@@ -1,0 +1,55 @@
+import { NextResponse } from "next/server";
+
+export async function POST(req: Request) {
+  try {
+    const { scoutId } = await req.json();
+    console.log("[scout/execute] Received scoutId:", scoutId);
+
+    if (!scoutId) {
+      return NextResponse.json(
+        { error: "scoutId is required" },
+        { status: 400 },
+      );
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error("[scout/execute] Supabase config missing");
+      return NextResponse.json(
+        { error: "Supabase configuration missing" },
+        { status: 500 },
+      );
+    }
+
+    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/scout-cron?scoutId=${scoutId}`;
+    console.log("[scout/execute] Triggering edge function:", edgeFunctionUrl);
+
+    // Trigger the edge function asynchronously (fire-and-forget)
+    // Don't await - let it run in the background
+    fetch(edgeFunctionUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${supabaseAnonKey}`,
+        "Content-Type": "application/json",
+      },
+    }).catch((error) => {
+      console.error("[scout/execute] Edge function trigger error:", error);
+    });
+
+    console.log("[scout/execute] Scout execution triggered successfully");
+
+    // Return immediately - the client will receive updates via real-time subscriptions
+    return NextResponse.json({
+      success: true,
+      message: "Scout execution triggered",
+      scoutId,
+    });
+  } catch (error) {
+    console.error("[scout/execute] Error triggering scout execution:", error);
+    const message =
+      error instanceof Error ? error.message : "Unknown error occurred";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
