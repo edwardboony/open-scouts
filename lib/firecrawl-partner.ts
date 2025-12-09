@@ -1,6 +1,6 @@
 "use server";
 
-import { supabaseServer } from "./supabase/server";
+import { getSupabaseServer } from "./supabase/server";
 
 const FIRECRAWL_API_URL = "https://api.firecrawl.dev";
 
@@ -64,7 +64,7 @@ export async function createFirecrawlKeyForUser(
       );
 
       // Update user preferences with failed status
-      await supabaseServer.from("user_preferences").upsert(
+      await getSupabaseServer().from("user_preferences").upsert(
         {
           user_id: userId,
           firecrawl_key_status: "failed",
@@ -92,7 +92,7 @@ export async function createFirecrawlKeyForUser(
     );
 
     // Store the API key in user preferences
-    await supabaseServer.from("user_preferences").upsert(
+    await getSupabaseServer().from("user_preferences").upsert(
       {
         user_id: userId,
         firecrawl_api_key: apiKey,
@@ -114,7 +114,7 @@ export async function createFirecrawlKeyForUser(
     );
 
     // Update user preferences with failed status
-    await supabaseServer.from("user_preferences").upsert(
+    await getSupabaseServer().from("user_preferences").upsert(
       {
         user_id: userId,
         firecrawl_key_status: "failed",
@@ -186,7 +186,7 @@ export async function getFirecrawlKeyForUser(userId: string): Promise<{
   useFallback: boolean;
 }> {
   try {
-    const { data, error } = await supabaseServer
+    const { data, error } = await getSupabaseServer()
       .from("user_preferences")
       .select("firecrawl_api_key, firecrawl_key_status")
       .eq("user_id", userId)
@@ -226,7 +226,7 @@ export async function markFirecrawlKeyInvalid(
   userId: string,
   reason: string,
 ): Promise<void> {
-  await supabaseServer
+  await getSupabaseServer()
     .from("user_preferences")
     .update({
       firecrawl_key_status: "invalid",
@@ -247,7 +247,7 @@ export async function logFirecrawlUsage(params: {
   apiCallsCount?: number;
 }): Promise<void> {
   try {
-    await supabaseServer.from("firecrawl_usage_logs").insert({
+    await getSupabaseServer().from("firecrawl_usage_logs").insert({
       user_id: params.userId,
       scout_id: params.scoutId || null,
       execution_id: params.executionId || null,
@@ -268,7 +268,7 @@ export async function getFirecrawlKeyInfo(
   userId: string,
 ): Promise<FirecrawlKeyInfo> {
   try {
-    const { data, error } = await supabaseServer
+    const { data, error } = await getSupabaseServer()
       .from("user_preferences")
       .select(
         "firecrawl_api_key, firecrawl_key_status, firecrawl_key_created_at, firecrawl_key_error",

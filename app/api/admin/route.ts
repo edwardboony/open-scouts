@@ -1,3 +1,4 @@
+console.log("ENV SUPABASE URL =", process.env.NEXT_PUBLIC_SUPABASE_URL);
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient, supabaseServer } from "@/lib/supabase/server";
 

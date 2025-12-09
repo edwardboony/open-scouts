@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { supabaseServer } from "@/lib/supabase/server";
+import { getSupabaseServer } from "@/lib/supabase/server";
 import { regenerateFirecrawlKey } from "@/lib/firecrawl-partner";
 
 // Rate limit: minimum seconds between regeneration attempts
@@ -28,7 +28,7 @@ export async function POST() {
     }
 
     // Check rate limit - prevent regeneration within RATE_LIMIT_SECONDS
-    const { data: preferences } = await supabaseServer
+    const { data: preferences } = await getSupabaseServer()
       .from("user_preferences")
       .select("firecrawl_key_created_at")
       .eq("user_id", user.id)

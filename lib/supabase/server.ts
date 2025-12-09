@@ -30,7 +30,10 @@ export async function createServerSupabaseClient() {
 }
 
 // Service role client for admin operations (bypasses RLS)
-export const supabaseServer = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
+// Changed from `export const` to `export function`
+export function getSupabaseServer() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+}
